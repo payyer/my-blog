@@ -1,5 +1,4 @@
 const models = require('../models/index');
-const post = require('../models/post');
 
 // [GET] /api/v1/post
 const getPosts = async (req, res) => {
@@ -24,6 +23,36 @@ const getPosts = async (req, res) => {
     }
     catch (err) {
         res.json({ status: -1, message: 'Lỗi hệ thống', err });
+    }
+}
+
+// [GET] /api/v1/post/detail/:postId
+const getPost = async (req, res) => {
+    const { postId } = req.params;
+    console.log(postId);
+    try {
+        const post = await models.Post.findOne({ where: { id: postId } });
+        if (post) {
+            await post.update({ views: post.views + 1 })
+            return res.status(200).json({
+                status: 0,
+                message: "Detail post",
+                data: post
+            });
+        } else {
+            return res.status(404).json({
+                status: 1,
+                message: 'Không tìm thấy bài viết'
+            })
+        }
+
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({
+            status: -1,
+            message: 'Lỗi hệ thống'
+        })
     }
 }
 
@@ -60,6 +89,47 @@ const createPost = async (req, res) => {
     }
 }
 
+// [PUT] /api/v1/post/update/:postId
+const editPost = async (req, res) => {
+    const { postId } = req.params;
+    const user = req.user;
+    const { title, article } = req.body;
+    try {
+        if (!title || !article) {
+            return res.status(400).json({
+                status: 1,
+                message: 'Bạn chưa nhập nội dung'
+            })
+        }
+        const post = await models.Post.findOne({ where: { id: postId } });
+        if (!post) {
+            return res.status(403).json({
+                status: 1,
+                message: 'Không tìm thấy bài viết'
+            })
+        }
+        if (user.id === post.userId) {
+            await post.update({ title, article })
+            return res.status(200).json({
+                status: 0,
+                message: 'Edit bài viết thành công'
+            })
+        } else {
+            return res.status(403).json({
+                status: 1,
+                message: 'Bạn không có quyền sửa bài viến này!'
+            })
+        }
+    }
+    catch (err) {
+        return res.status(500).json({
+            status: -1,
+            message: 'Lỗi hệ thống'
+        })
+    }
+}
+
+// [DELETE] /api/v1/post/create/:postId
 const deletePost = async (req, res) => {
     const { postId } = req.params;
     const user = req.user;
@@ -93,5 +163,5 @@ const deletePost = async (req, res) => {
 }
 
 module.exports = {
-    getPosts, createPost, deletePost
+    getPosts, getPost, createPost, editPost, deletePost
 }
