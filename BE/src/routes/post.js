@@ -3,7 +3,11 @@ const router = express.Router();
 const postController = require('../controller/PostController');
 const authentication = require('../util/verifiredUser');
 
-router.get('/', postController.getPosts);
+router.get('/', authentication.verifiredAdmin, postController.getPosts);
+
+router.get('/post-verified', postController.getPostsVerified)
+
+router.get('/post-unverified', authentication.verifiredAdmin, postController.getPostsUnVerified)
 
 router.get('/detail/:postId', postController.getPost)
 

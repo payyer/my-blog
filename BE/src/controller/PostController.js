@@ -1,5 +1,5 @@
 const models = require('../models/index');
-
+const jwt = require('jsonwebtoken')
 // [GET] /api/v1/post
 const getPosts = async (req, res) => {
     try {
@@ -18,6 +18,78 @@ const getPosts = async (req, res) => {
         return res.status(200).json({
             status: 0,
             message: "Lấy tất cả bài viết thành công",
+            data: posts
+        });
+    }
+    catch (err) {
+        res.json({ status: -1, message: 'Lỗi hệ thống', err });
+    }
+}
+
+// [GET] /api/v1/post/post-verified
+const getPostsVerified = async (req, res) => {
+    const { user_access } = req.cookies;
+    try {
+
+        const posts = await models.Post.findAll({
+            where: {
+                censorship: true
+            },
+            include: [
+                {
+                    model: models.Topic,
+                    attributes: ['name'],
+                },
+                {
+                    model: models.User,
+                    attributes: ['name'],
+                }
+            ]
+        });
+        if (user_access) {
+            const decodeedToken = jwt.verify(user_access, process.env.JWT_SECRET);
+            return res.status(200).json({
+                status: 0,
+                message: "Lấy tất cả bài viết đã kiểm duyện thành công",
+                data: posts,
+                user: decodeedToken
+            });
+        } else {
+            return res.status(200).json({
+                status: 0,
+                message: "Lấy tất cả bài viết đã kiểm duyện thành công",
+                data: posts,
+                user: ''
+            });
+        }
+
+    }
+    catch (err) {
+        res.json({ status: -1, message: 'Lỗi hệ thống', err });
+    }
+}
+
+// [GET] /api/v1/post/post-verified
+const getPostsUnVerified = async (req, res) => {
+    try {
+        const posts = await models.Post.findAll({
+            where: {
+                censorship: false
+            },
+            include: [
+                {
+                    model: models.Topic,
+                    attributes: ['name'],
+                },
+                {
+                    model: models.User,
+                    attributes: ['name'],
+                }
+            ]
+        });
+        return res.status(200).json({
+            status: 0,
+            message: "Lấy tất cả bài viết đã kiểm duyện thành công",
             data: posts
         });
     }
@@ -134,6 +206,13 @@ const deletePost = async (req, res) => {
     const { postId } = req.params;
     const user = req.user;
     try {
+        const comments = await models.Comment.findAll({ where: { postId } });
+        console.log('Comment >> ', comments);
+        if (comments && comments.length > 0) {
+            for (const comment of comments) {
+                await comment.destroy();
+            }
+        }
         const post = await models.Post.findOne({ where: { id: postId } });
         if (!post) {
             return res.status(404).json({
@@ -163,5 +242,5 @@ const deletePost = async (req, res) => {
 }
 
 module.exports = {
-    getPosts, getPost, createPost, editPost, deletePost
+    getPosts, getPostsVerified, getPostsUnVerified, getPost, createPost, editPost, deletePost
 }

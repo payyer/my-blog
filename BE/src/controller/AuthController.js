@@ -91,6 +91,12 @@ const authLogout = async (req, res) => {
 const authRegister = async (req, res) => {
     const { email, password, name, age, phone, gender } = req.body;
     try {
+        if (!email || !password || !name || !age || !phone || !gender) {
+            return res.status(200).json({
+                status: 1,
+                message: "Bạn cần nhập đầy đủ thông tin!"
+            })
+        }
         const checkEmailIsExits = await models.User.findOne({ where: { email } });
         if (checkEmailIsExits) {
             return res.status(200).json({
@@ -118,6 +124,8 @@ const authRegister = async (req, res) => {
                 </a>`,
         });
         console.log("Message sent: %s", info.messageId);
+
+
 
         const slat = bcrypt.genSaltSync();
         const hashingPassword = bcrypt.hashSync(password, slat);
@@ -191,10 +199,8 @@ const forgotPassword = async (req, res) => {
                 from: 'anhhocfullstack@gmail.com', // sender address
                 to: email,
                 subject: "Verifired Email",
-                text: "Ấn vào link bên dưới để xác nhận Email",
-                html: `<a href=http://localhost:8080/api/v1/reset-password/${opt}>
-                        http://localhost:8080/api/v1/reset-password/${opt}
-                    </a>`,
+                text: "OPT is secrect, don't share it to anyone ",
+                html: `<h1>Your OPT: ${opt}</h1>`,
             });
             console.log("Message sent: %s", info.messageId);
             return res.status(200).json({
@@ -217,30 +223,29 @@ const forgotPassword = async (req, res) => {
 
 }
 
-// [PUT] api/v1/auth/forgot-password/reset-password/:opt
+// [PUT] api/v1/auth/forgot-password/reset-password
 const resetPassword = async (req, res) => {
-    const { opt } = req.params;
-    const { newPassword } = req.body;
+    const { password, opt } = req.body;
     try {
         const user = await models.User.findOne({ where: { opt } });
         if (user) {
-            if (!newPassword) {
+            if (!password) {
                 return res.status(200).json({
                     status: 1,
                     message: 'Chưa nhập mật khẩu mới'
                 })
             }
             const salt = bcrypt.genSaltSync()
-            const hashingPassword = bcrypt.hashSync(newPassword, salt)
-            await user.update({ password: hashingPassword });
+            const hashingPassword = bcrypt.hashSync(password, salt)
+            await user.update({ password: hashingPassword, opt: "0982" });
             return res.status(200).json({
                 status: 0,
                 message: 'Cập nhập mật khẩu thành công',
             })
         } else {
-            return res.status(404).json({
+            return res.status(200).json({
                 status: 1,
-                message: 'Không tìm thấy mã OPT'
+                message: 'Mã OPT sai hoặc không tìm thấy!'
             })
         }
     }
