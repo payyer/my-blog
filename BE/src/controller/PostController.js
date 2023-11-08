@@ -69,7 +69,7 @@ const getPostsVerified = async (req, res) => {
     }
 }
 
-// [GET] /api/v1/post/post-verified
+// [GET] /api/v1/post/post-unverified
 const getPostsUnVerified = async (req, res) => {
     try {
         const posts = await models.Post.findAll({
@@ -89,7 +89,7 @@ const getPostsUnVerified = async (req, res) => {
         });
         return res.status(200).json({
             status: 0,
-            message: "Lấy tất cả bài viết đã kiểm duyện thành công",
+            message: "Lấy tất cả bài viết chưa kiểm",
             data: posts
         });
     }
@@ -103,7 +103,19 @@ const getPost = async (req, res) => {
     const { postId } = req.params;
     console.log(postId);
     try {
-        const post = await models.Post.findOne({ where: { id: postId } });
+        const post = await models.Post.findOne({
+            where: { id: postId },
+            include: [
+                {
+                    model: models.Topic,
+                    attributes: ['name'],
+                },
+                {
+                    model: models.User,
+                    attributes: ['name'],
+                }
+            ]
+        });
         if (post) {
             await post.update({ views: post.views + 1 })
             return res.status(200).json({

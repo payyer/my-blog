@@ -3,7 +3,14 @@ const models = require('../models/index');
 // [GET] api/v1/comment/
 const getComments = async (req, res) => {
     try {
-        const comments = await models.Comment.findAll();
+        const comments = await models.Comment.findAll({
+            include: [
+                {
+                    model: models.User,
+                    attributes: ['name'],
+                }
+            ]
+        });
         return res.status(200).json({
             status: 0,
             message: "Lấy toàn bộ comment thành công",

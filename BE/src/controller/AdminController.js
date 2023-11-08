@@ -3,7 +3,7 @@ const models = require('../models/index');
 
 // [PUT] api/v1/admin/censorship/:postId
 const censorshipPost = async (req, res) => {
-    const { postId } = req.params;
+    const { postId } = req.body;
     try {
         const post = await models.Post.findOne({ where: { id: postId } });
         if (!post) {

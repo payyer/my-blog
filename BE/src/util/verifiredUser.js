@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 
 function verifiredUser(req, res, next) {
     const { user_access } = req.cookies;
+    console.log('This is token from server', user_access)
     try {
         if (user_access) {
             const decodeedToken = jwt.verify(user_access, process.env.JWT_SECRET);

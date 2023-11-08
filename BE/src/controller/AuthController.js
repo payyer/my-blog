@@ -33,7 +33,7 @@ const authLogin = async (req, res) => {
                     role: checkUser.role,
                 }
                 const accessToke = jwt.sign(data, process.env.JWT_SECRET);
-                res.cookie('user_access', accessToke, { httpOnly: true })
+                res.cookie('user_access', accessToke)
                 return res.status(200).json({
                     message: 'Đăng nhập thành công',
                     status: 0,
