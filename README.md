@@ -1,5 +1,5 @@
 # my-blog
-**Simple web to programming knowledge**
+**Simple web to share programming knowledge**
 1. Decentralize user and admin rights with JWT.
 2. Admin: censors users' posts before posting, monitors post management and deletes inappropriate posts
 3. User: CRUD post, comment on post.
