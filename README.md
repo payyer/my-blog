@@ -7,7 +7,10 @@
 5. Technology Used:
    FE: ReactJS, TailwindCSS
    BE: NodeJS (Express), PostgresSQL
-   
+
+API: https://elements.getpostman.com/redirect?entityId=29086131-1f2dbf9d-fdad-48ca-be22-9aa5b15f5932&entityType=collection
+
+
 Page: Home:
 ![image](https://github.com/payyer/my-blog/assets/126885373/88e6bdd1-bfa9-4aa8-9f2f-7eb512e763b4)
 
